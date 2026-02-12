@@ -6,7 +6,7 @@
     <title>Mchongo App - Connection Imekamilika</title>
     <style>
         :root { --primary: #2563eb; --dark: #1e293b; --light: #f8fafc; --success: #22c55e; }
-        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; color: var(--dark); }
+        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; color: var(--dark); padding-bottom: 70px; }
         .nav-bar { background: var(--dark); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .container { padding: 15px; max-width: 600px; margin: auto; }
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -18,7 +18,6 @@
         input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-top: 10px; }
         
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e2e8f0; }
@@ -26,7 +25,8 @@
         .nav-item.active { color: var(--primary); font-weight: bold; }
         
         .hidden { display: none !important; }
-        .mchongo-card { border-left: 4px solid var(--primary); margin-bottom: 15px; }
+        .mchongo-card { border-left: 5px solid var(--primary); position: relative; }
+        .budget-tag { color: var(--success); font-weight: bold; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -72,16 +72,19 @@
         <div id="pageDashboard" class="hidden">
             <h3 style="margin-top:0;">Michongo Inayokufaa</h3>
             <div id="mchongoFeed">
-                <p style="text-align:center; color:#64748b;">Inatafuta michongo mipya...</p>
+                <p style="text-align:center; color:#64748b;">Inapakia michongo...</p>
             </div>
         </div>
 
         <div id="pagePost" class="hidden">
             <div class="card">
                 <h3>Post Mchongo Mpya</h3>
-                <input type="text" id="postTitle" placeholder="Kichwa cha mchongo">
-                <textarea id="postDesc" rows="4" placeholder="Elezea mchongo huu kwa kina..."></textarea>
-                <input type="number" id="postBudget" placeholder="Malipo/Bajeti (Tsh)">
+                <label>Kichwa cha Mchongo</label>
+                <input type="text" id="postTitle" placeholder="Mfano: Tunatafuta fundi bomba">
+                <label>Maelezo ya Kina</label>
+                <textarea id="postDesc" rows="4" placeholder="Elezea mchongo huu kwa kina ili watu wakuelewe..."></textarea>
+                <label>Bajeti/Malipo (Tsh)</label>
+                <input type="number" id="postBudget" placeholder="Mfano: 50000">
                 <button onclick="publishMchongo()" class="btn-primary">POST MCHONGO</button>
             </div>
         </div>
@@ -89,15 +92,14 @@
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="showPage('dashboard')">🏠<br>Michongo</div>
-        <div class="nav-item" onclick="showPage('post')">➕<br>Weka</div>
-        <div class="nav-item" onclick="showPage('profile')">👤<br>Profile</div>
+        <div id="nav-dash" class="nav-item active" onclick="showPage('dashboard')">🏠<br>Michongo</div>
+        <div id="nav-post" class="nav-item" onclick="showPage('post')">➕<br>Weka</div>
+        <div id="nav-prof" class="nav-item" onclick="showPage('profile')">👤<br>Profile</div>
     </div>
 
     <script type="module">
-        // Firebase initialization (Tutumie ile ile ya jana)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDXG65JsQ2pB96O33T5itgWUNJPH8IzFuk",
@@ -111,47 +113,36 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Kwenye Mchongo App, tutatumia ID ya kipekee kwa kila kifaa (LocalStorage)
         let userID = localStorage.getItem('mchongo_userid') || "user_" + Math.floor(Math.random() * 1000000);
         localStorage.setItem('mchongo_userid', userID);
 
         // Kazi ya kuhifadhi Profile
         window.saveProfile = async () => {
-            const userRef = doc(db, "users", userID);
-            const data = {
-                name: document.getElementById('setupName').value,
-                phone: document.getElementById('setupPhone').value,
-                skill: document.getElementById('setupSkill').value,
-                location: document.getElementById('setupLocation').value,
-                joinedAt: new Date().toISOString()
-            };
+            const name = document.getElementById('setupName').value;
+            const phone = document.getElementById('setupPhone').value;
+            const skill = document.getElementById('setupSkill').value;
+            const locName = document.getElementById('setupLocation').value;
 
-            if(!data.name || !data.phone) {
-                alert("Tafadhali jaza Jina na Simu!");
-                return;
-            }
+            if(!name || !phone) { alert("Tafadhali jaza Jina na Simu!"); return; }
 
             try {
-                await setDoc(userRef, data);
-                alert("Profile yako imehifadhiwa!");
+                await setDoc(doc(db, "users", userID), {
+                    name, phone, skill, location: locName, joinedAt: new Date().toISOString()
+                });
+                alert("Profile imehifadhiwa!");
                 loadUserData();
                 showPage('dashboard');
-            } catch (e) {
-                alert("Kuna shida kidogo: " + e.message);
-            }
+            } catch (e) { alert("Shida: " + e.message); }
         };
 
-        // Kupakia data za Profile
+        // Pakia data za User
         async function loadUserData() {
-            const userRef = doc(db, "users", userID);
-            const snap = await getDoc(userRef);
+            const snap = await getDoc(doc(db, "users", userID));
             if(snap.exists()) {
                 const d = snap.data();
                 document.getElementById('topUsername').innerText = d.name;
                 document.getElementById('profDisplayName').innerText = d.name;
                 document.getElementById('profInitial').innerText = d.name.charAt(0).toUpperCase();
-                
-                // Jaza fomu na data zilizopo
                 document.getElementById('setupName').value = d.name;
                 document.getElementById('setupPhone').value = d.phone;
                 document.getElementById('setupSkill').value = d.skill;
@@ -159,26 +150,93 @@
             }
         }
 
-        // Switch Pages
+        // Pakia Michongo kwenye Dashboard
+        window.loadDashboard = () => {
+            const feed = document.getElementById('mchongoFeed');
+            const q = query(collection(db, "michongo"), orderBy("timestamp", "desc"));
+            
+            onSnapshot(q, (snap) => {
+                let html = "";
+                if(snap.empty) {
+                    html = `<div style="text-align:center; margin-top:50px; color:#64748b;">Bado hakuna mchongo wowote.</div>`;
+                } else {
+                    snap.forEach(doc => {
+                        const m = doc.data();
+                        html += `
+                            <div class="card mchongo-card">
+                                <h3 style="margin:0; color:var(--primary);">${m.title}</h3>
+                                <p style="font-size:0.95rem; line-height:1.5; color:#334155;">${m.desc}</p>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                                    <span style="font-size:0.85rem; color:#64748b;">📍 ${m.location}</span>
+                                    <span class="budget-tag">Tsh ${Number(m.budget).toLocaleString()}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:10px;">
+                                    <span style="font-size:0.8rem; color:#1e293b;">Kutoka: <b>${m.ownerName}</b></span>
+                                    <a href="https://wa.me/255${m.ownerPhone.startsWith('0') ? m.ownerPhone.substring(1) : m.ownerPhone}?text=Habari, nimeona mchongo wako: ${m.title}" 
+                                       style="background:#22c55e; color:white; padding:8px 15px; border-radius:8px; text-decoration:none; font-size:0.8rem; font-weight:bold;">
+                                       WHATSAPP
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                feed.innerHTML = html;
+            });
+        };
+
+        // Post Mchongo
+        window.publishMchongo = async () => {
+            const title = document.getElementById('postTitle').value;
+            const desc = document.getElementById('postDesc').value;
+            const budget = document.getElementById('postBudget').value;
+
+            const userSnap = await getDoc(doc(db, "users", userID));
+            if(!userSnap.exists()) { alert("Kamilisha profile kwanza!"); showPage('profile'); return; }
+
+            if(!title || !desc) { alert("Jaza kichwa na maelezo!"); return; }
+
+            try {
+                await addDoc(collection(db, "michongo"), {
+                    title, desc, budget,
+                    ownerName: userSnap.data().name,
+                    ownerPhone: userSnap.data().phone,
+                    location: userSnap.data().location,
+                    timestamp: new Date().getTime()
+                });
+                alert("Mchongo umewekwa hewani! 🚀");
+                document.getElementById('postTitle').value = "";
+                document.getElementById('postDesc').value = "";
+                document.getElementById('postBudget').value = "";
+                showPage('dashboard');
+            } catch (e) { alert("Shida: " + e.message); }
+        };
+
         window.showPage = (page) => {
             document.getElementById('pageProfile').classList.add('hidden');
             document.getElementById('pageDashboard').classList.add('hidden');
             document.getElementById('pagePost').classList.add('hidden');
             
-            if(page === 'profile') document.getElementById('pageProfile').classList.remove('hidden');
-            if(page === 'dashboard') {
+            document.getElementById('nav-dash').classList.remove('active');
+            document.getElementById('nav-post').classList.remove('active');
+            document.getElementById('nav-prof').classList.remove('active');
+
+            if(page === 'profile') {
+                document.getElementById('pageProfile').classList.remove('hidden');
+                document.getElementById('nav-prof').classList.add('active');
+            } else if(page === 'dashboard') {
                 document.getElementById('pageDashboard').classList.remove('hidden');
+                document.getElementById('nav-dash').classList.add('active');
                 loadDashboard();
+            } else if(page === 'post') {
+                document.getElementById('pagePost').classList.remove('hidden');
+                document.getElementById('nav-post').classList.add('active');
             }
-            if(page === 'post') document.getElementById('pagePost').classList.remove('hidden');
         };
 
-        // Pakia Profile pindi ikifunguka
+        // Kuanza kazi
         loadUserData();
-
-        // (Hizi tutazijaza baada ya kuelewana muundo wa Profile)
-        window.loadDashboard = () => { console.log("Dashboard inapakia..."); };
-        window.publishMchongo = () => { console.log("Inatuma mchongo..."); };
+        loadDashboard();
 
     </script>
 </body>
