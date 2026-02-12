@@ -3,71 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mchongo App - Chat System</title>
+    <title>Mchongo App - King Of Connection</title>
     <style>
-        :root { --primary: #2563eb; --dark: #1e293b; --light: #f8fafc; --success: #22c55e; }
-        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; padding-bottom: 70px; }
-        .nav-bar { background: var(--dark); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        :root { --primary: #2563eb; --dark: #1e293b; --light: #f8fafc; --success: #22c55e; --accent: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; color: var(--dark); padding-bottom: 80px; }
+        
+        /* Nav & Headers */
+        .nav-bar { background: var(--dark); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .container { padding: 15px; max-width: 600px; margin: auto; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--accent); }
+        .mchongo-card { border-left: 6px solid var(--primary); position: relative; transition: 0.3s; }
+        
+        /* Profile Avatar */
+        .profile-header { text-align: center; margin-bottom: 20px; }
+        .avatar { width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 10px; font-weight: bold; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        
+        /* Inputs & Buttons */
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { transform: scale(0.98); }
         
-        /* Chat Styles */
-        .chat-container { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: #fff; margin-bottom: 10px; display: flex; flex-direction: column; }
-        .msg { padding: 8px 12px; border-radius: 15px; margin: 5px; max-width: 80%; font-size: 0.9rem; }
-        .msg.sent { background: var(--primary); color: white; align-self: flex-end; }
-        .msg.received { background: #e2e8f0; align-self: flex-start; }
+        /* Chat UI */
+        .chat-container { height: 350px; overflow-y: auto; padding: 10px; background: #fdfdfd; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 10px 14px; border-radius: 18px; max-width: 75%; font-size: 0.95rem; line-height: 1.4; }
+        .msg.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background: var(--accent); color: var(--dark); align-self: flex-start; border-bottom-left-radius: 2px; }
         
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e2e8f0; }
-        .nav-item { text-align: center; font-size: 0.75rem; color: #64748b; cursor: pointer; }
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e2e8f0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { text-align: center; font-size: 0.75rem; color: #64748b; cursor: pointer; transition: 0.2s; }
+        .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
+        
         .hidden { display: none !important; }
-        .mchongo-card { border-left: 5px solid var(--primary); }
+        .budget-tag { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .badge-location { font-size: 0.8rem; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 5px; }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <div class="nav-bar">
-        <h2 id="appTitle">MCHONGO APP</h2>
-        <span id="topUsername" style="font-size: 0.8rem;">Karibu</span>
+        <h2 style="margin:0; font-size: 1.3rem; letter-spacing: 1px;">MCHONGO <span style="color:var(--primary)">APP</span></h2>
+        <span id="topUsername" style="font-size: 0.85rem; font-weight: 500;">...</span>
     </div>
 
     <div class="container">
         
         <div id="pageProfile">
+            <div class="profile-header">
+                <div class="avatar" id="profInitial">?</div>
+                <h3 id="profDisplayName" style="margin:5px 0">Mtumiaji Mpya</h3>
+            </div>
             <div class="card">
-                <h3>Kamilisha Profile</h3>
+                <h4 style="margin-top:0">Kamilisha Taarifa Zako</h4>
                 <input type="text" id="setupName" placeholder="Jina Kamili">
-                <input type="tel" id="setupPhone" placeholder="Simu">
-                <input type="text" id="setupLocation" placeholder="Mkoa">
-                <button onclick="saveProfile()" class="btn-primary">HIFADHI</button>
+                <input type="tel" id="setupPhone" placeholder="Namba ya WhatsApp (07...)">
+                <input type="text" id="setupLocation" placeholder="Unapoishi (Mfano: Dar)">
+                <button onclick="saveProfile()" class="btn-primary">HIFADHI PROFILE</button>
             </div>
         </div>
 
         <div id="pageDashboard" class="hidden">
-            <div id="mchongoFeed"></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0">Michongo Mipya</h3>
+                <span style="font-size:0.8rem; color:var(--primary)" onclick="loadDashboard()">Refresh</span>
+            </div>
+            <div id="mchongoFeed">
+                <p style="text-align:center; padding:40px; color:#64748b;">Inatafuta fursa...</p>
+            </div>
         </div>
 
         <div id="pagePost" class="hidden">
             <div class="card">
-                <h3>Weka Mchongo</h3>
-                <input type="text" id="postTitle" placeholder="Kichwa">
-                <textarea id="postDesc" placeholder="Maelezo"></textarea>
-                <input type="number" id="postBudget" placeholder="Bajeti (Tsh)">
-                <button onclick="publishMchongo()" class="btn-primary">POST</button>
+                <h3 style="margin-top:0">Weka Mchongo Mpya</h3>
+                <label style="font-size:0.85rem; font-weight:600">Kichwa cha Mchongo</label>
+                <input type="text" id="postTitle" placeholder="Mfano: Fundi wa Magari">
+                <label style="font-size:0.85rem; font-weight:600">Maelezo</label>
+                <textarea id="postDesc" rows="4" placeholder="Elezea mchongo huu kwa ufupi..."></textarea>
+                <label style="font-size:0.85rem; font-weight:600">Bajeti (Tsh)</label>
+                <input type="number" id="postBudget" placeholder="Mfano: 30000">
+                <button onclick="publishMchongo()" class="btn-primary">WEKA HEWANI</button>
             </div>
         </div>
 
         <div id="pageChat" class="hidden">
-            <button onclick="showPage('dashboard')" style="width: auto; padding: 5px 10px; margin-bottom: 10px;">← Rudi</button>
-            <div class="card">
-                <h4 id="chatWith">Chat</h4>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <button onclick="showPage('dashboard')" style="width:auto; background:var(--accent); color:var(--dark); padding:8px 15px;">←</button>
+                <h4 id="chatWith" style="margin:0">Chat</h4>
+            </div>
+            <div class="card" style="padding:10px;">
                 <div id="chatBox" class="chat-container"></div>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="chatInput" placeholder="Andika ujumbe...">
-                    <button onclick="sendMessage()" style="width:70px; background:var(--primary); color:white;">SEND</button>
+                <div style="display:flex; gap:8px; padding-top:10px; border-top:1px solid #eee;">
+                    <input type="text" id="chatInput" placeholder="Andika ujumbe..." style="margin:0">
+                    <button onclick="sendMessage()" style="width:60px; background:var(--primary); color:white; margin:0"><i class="fa fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -75,9 +108,9 @@
     </div>
 
     <div class="bottom-nav">
-        <div id="nav-dash" class="nav-item active" onclick="showPage('dashboard')">🏠<br>Michongo</div>
-        <div id="nav-post" class="nav-item" onclick="showPage('post')">➕<br>Weka</div>
-        <div id="nav-prof" class="nav-item" onclick="showPage('profile')">👤<br>Profile</div>
+        <div id="nav-dash" class="nav-item" onclick="showPage('dashboard')"><i class="fa fa-home"></i>Michongo</div>
+        <div id="nav-post" class="nav-item" onclick="showPage('post')"><i class="fa fa-plus-circle"></i>Weka</div>
+        <div id="nav-prof" class="nav-item" onclick="showPage('profile')"><i class="fa fa-user-circle"></i>Profile</div>
     </div>
 
     <script type="module">
@@ -106,13 +139,19 @@
             const loc = document.getElementById('setupLocation').value;
             if(!name || !phone) return alert("Jaza Jina na Simu!");
             await setDoc(doc(db, "users", userID), { name, phone, location: loc });
-            alert("Sawa!"); loadUserData(); showPage('dashboard');
+            loadUserData();
         };
 
         async function loadUserData() {
             const snap = await getDoc(doc(db, "users", userID));
             if(snap.exists()) {
-                document.getElementById('topUsername').innerText = snap.data().name;
+                const d = snap.data();
+                document.getElementById('topUsername').innerText = d.name;
+                document.getElementById('profDisplayName').innerText = d.name;
+                document.getElementById('profInitial').innerText = d.name.charAt(0).toUpperCase();
+                document.getElementById('setupName').value = d.name;
+                document.getElementById('setupPhone').value = d.phone;
+                document.getElementById('setupLocation').value = d.location;
                 showPage('dashboard');
             }
         }
@@ -124,19 +163,43 @@
                     const m = d.data();
                     html += `
                         <div class="card mchongo-card">
-                            <h3>${m.title}</h3>
-                            <p>${m.desc}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <b>Tsh ${Number(m.budget).toLocaleString()}</b>
-                                <div style="display:flex; gap:5px;">
-                                    <button onclick="openChat('${m.ownerID}', '${m.ownerName}')" style="background:var(--primary); color:white; padding:5px 10px; width:auto; font-size:0.8rem;">CHATI</button>
-                                    <a href="https://wa.me/255${m.ownerPhone}" style="background:#22c55e; color:white; padding:5px 10px; border-radius:8px; text-decoration:none; font-size:0.8rem;">WA</a>
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <h3 style="margin:0; font-size:1.1rem; color:var(--dark);">${m.title}</h3>
+                                <span class="budget-tag">Tsh ${Number(m.budget).toLocaleString()}</span>
+                            </div>
+                            <p style="font-size:0.9rem; color:#475569; margin:10px 0;">${m.desc}</p>
+                            <span class="badge-location"><i class="fa fa-location-dot"></i> ${m.location}</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; border-top:1px solid #f1f5f9; padding-top:10px;">
+                                <span style="font-size:0.8rem;">By: <b>${m.ownerName}</b></span>
+                                <div style="display:flex; gap:8px;">
+                                    <button onclick="openChat('${m.ownerID}', '${m.ownerName}')" style="background:var(--primary); color:white; padding:6px 12px; width:auto; font-size:0.8rem;"><i class="fa fa-comments"></i> CHATI</button>
+                                    <a href="https://wa.me/255${m.ownerPhone.startsWith('0')?m.ownerPhone.substring(1):m.ownerPhone}" style="background:#22c55e; color:white; padding:6px 12px; border-radius:10px; text-decoration:none; font-size:0.8rem;"><i class="fa-brands fa-whatsapp"></i></a>
                                 </div>
                             </div>
                         </div>`;
                 });
-                document.getElementById('mchongoFeed').innerHTML = html || "Hakuna mchongo.";
+                document.getElementById('mchongoFeed').innerHTML = html || "Hakuna michongo kwa sasa.";
             });
+        };
+
+        window.publishMchongo = async () => {
+            const uSnap = await getDoc(doc(db, "users", userID));
+            if(!uSnap.exists()) return showPage('profile');
+            const title = document.getElementById('postTitle').value;
+            const desc = document.getElementById('postDesc').value;
+            const budget = document.getElementById('postBudget').value;
+            if(!title || !desc) return alert("Jaza kichwa na maelezo!");
+            
+            await addDoc(collection(db, "michongo"), {
+                title, desc, budget,
+                ownerID: userID,
+                ownerName: uSnap.data().name,
+                ownerPhone: uSnap.data().phone,
+                location: uSnap.data().location,
+                timestamp: Date.now()
+            });
+            alert("Mchongo Umepostiwa! 🚀");
+            showPage('dashboard');
         };
 
         window.openChat = (targetID, targetName) => {
@@ -163,36 +226,25 @@
         }
 
         window.sendMessage = async () => {
-            const text = document.getElementById('chatInput').value;
-            if(!text) return;
+            const input = document.getElementById('chatInput');
+            if(!input.value) return;
             await addDoc(collection(db, "messages"), {
                 chatID: currentChatID,
                 sender: userID,
-                text: text,
+                text: input.value,
                 time: Date.now()
             });
-            document.getElementById('chatInput').value = "";
-        };
-
-        window.publishMchongo = async () => {
-            const uSnap = await getDoc(doc(db, "users", userID));
-            if(!uSnap.exists()) return showPage('profile');
-            await addDoc(collection(db, "michongo"), {
-                title: document.getElementById('postTitle').value,
-                desc: document.getElementById('postDesc').value,
-                budget: document.getElementById('postBudget').value,
-                ownerID: userID,
-                ownerName: uSnap.data().name,
-                ownerPhone: uSnap.data().phone,
-                location: uSnap.data().location,
-                timestamp: Date.now()
-            });
-            alert("Mchongo Hewani!"); showPage('dashboard');
+            input.value = "";
         };
 
         window.showPage = (p) => {
             ['pageProfile','pageDashboard','pagePost','pageChat'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['nav-dash','nav-post','nav-prof'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).classList.remove('active'); });
+            
             document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).classList.remove('hidden');
+            if(p !== 'chat' && document.getElementById('nav-' + p.substring(0,4))) {
+                document.getElementById('nav-' + p.substring(0,4)).classList.add('active');
+            }
         };
 
         loadUserData();
